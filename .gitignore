@@ -1,0 +1,9 @@
+node_modules
+npm-debug.log
+build
+.temp-download
+/dist
+/electron/app
+/electron/version.json
+/build/icon.png
+/build/icon.ico

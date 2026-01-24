@@ -1,0 +1,36 @@
+{
+  "name": "cyberchef-electron-offline",
+  "version": "1.0.0",
+  "private": true,
+  "description": "One-click offline Electron build for CyberChef (fetches latest release, CSP-enforced no-network)",
+  "author": "",
+  "license": "Apache-2.0",
+  "main": "electron-main.js",
+  "scripts": {
+    "prepare:electron": "node scripts/download-cyberchef.js",
+    "electron:dev": "npm run prepare:electron && npx electron electron-main.js",
+    "electron:build:linux": "npm run prepare:electron && npx electron-builder --linux AppImage",
+    "electron:build:win": "npm run prepare:electron && npx electron-builder --win nsis portable",
+    "test:network-isolation": "npx electron scripts/test-network-isolation.js"
+  },
+  "devDependencies": {
+    "electron": "^31.2.0",
+    "electron-builder": "^24.13.3",
+    "extract-zip": "^2.0.1"
+  },
+  "build": {
+    "appId": "io.cyberchef.desktop",
+    "productName": "CyberChef",
+    "files": [
+      "electron-main.js"
+    ],
+    "extraResources": [
+      { "from": "electron/app", "to": "app" },
+      { "from": "electron/version.json", "to": "version.json" }
+    ],
+    "extraMetadata": { "main": "electron-main.js" },
+    "directories": { "output": "dist/electron" },
+    "linux": { "target": ["AppImage"], "category": "Utility", "icon": "build/icon.png" },
+    "win": { "target": ["nsis", "portable"], "icon": "build/icon.ico" }
+  }
+}

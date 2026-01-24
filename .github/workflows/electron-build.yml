@@ -1,0 +1,149 @@
+name: Build Electron App (Offline)
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 2 * * 1'
+
+jobs:
+  build-linux:
+    name: Linux (AppImage)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Prepare latest CyberChef assets
+        run: npm run prepare:electron
+
+      - name: Build Linux AppImage
+        run: npm run electron:build:linux
+
+      - name: Generate checksums
+        run: |
+          cd dist/electron
+          sha256sum * > SHA256SUMS.txt
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: CyberChef-Electron-Linux
+          path: |
+            dist/electron/*.AppImage
+            dist/electron/SHA256SUMS.txt
+          retention-days: 30
+
+  build-windows:
+    name: Windows (NSIS + Portable)
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Prepare latest CyberChef assets
+        run: npm run prepare:electron
+
+      - name: Build Windows exe
+        run: npm run electron:build:win
+
+      - name: Generate checksums
+        shell: pwsh
+        run: |
+          Set-Location dist/electron
+          Get-ChildItem -File | ForEach-Object {
+            $hash = Get-FileHash -Algorithm SHA256 -Path $_.FullName
+            "$($hash.Hash)  $($_.Name)" | Out-File -FilePath SHA256SUMS.txt -Append -Encoding ASCII
+          }
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: CyberChef-Electron-Windows
+          path: |
+            dist/electron/*.exe
+            dist/electron/SHA256SUMS.txt
+          retention-days: 30
+
+  verify-and-release:
+    name: Verify CSP and Create Release
+    needs: [build-linux, build-windows]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Prepare latest CyberChef assets
+        run: npm run prepare:electron
+
+      - name: Run CSP/Network Isolation Tests
+        run: npm run test:network-isolation
+
+      - name: Download artifacts (Linux)
+        uses: actions/download-artifact@v4
+        with:
+          name: CyberChef-Electron-Linux
+          path: artifacts/linux
+
+      - name: Download artifacts (Windows)
+        uses: actions/download-artifact@v4
+        with:
+          name: CyberChef-Electron-Windows
+          path: artifacts/windows
+
+      - name: Compose release body
+        id: release_body
+        run: |
+          VERSION=$(node -e "console.log(require('./electron/version.json').version)")
+          DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+          echo "date=${DATE}" >> $GITHUB_OUTPUT
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: electron-v${{ steps.release_body.outputs.version }}
+          name: CyberChef Electron v${{ steps.release_body.outputs.version }} (Offline)
+          draft: false
+          prerelease: false
+          body: |
+            CyberChef Electron (Offline)
+
+            - Version: ${{ steps.release_body.outputs.version }}
+            - Build date: ${{ steps.release_body.outputs.date }}
+            - Security: Network access disabled via CSP (`connect-src 'none'`), processing happens locally.
+
+            Artifacts include AppImage (Linux), NSIS installer and Portable (Windows), with SHA256 checksums.
+
+            Upstream project: https://github.com/gchq/CyberChef
+          files: |
+            artifacts/linux/*
+            artifacts/windows/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
