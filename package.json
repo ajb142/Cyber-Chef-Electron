@@ -22,13 +22,16 @@
   "build": {
     "appId": "io.cyberchef.desktop",
     "productName": "CyberChef",
+    "asar": true,
+    "asarUnpack": [],
     "files": [
       "electron-main.js"
     ],
     "extraResources": [
       {
         "from": "electron/app",
-        "to": "app"
+        "to": "app",
+        "filter": ["**/*", "!**/*.LICENSE.txt"]
       },
       {
         "from": "electron/version.json",
@@ -41,6 +44,7 @@
     "directories": {
       "output": "dist/electron"
     },
+    "compression": "maximum",
     "linux": {
       "target": [
         "AppImage"
@@ -54,6 +58,15 @@
         "portable"
       ],
       "icon": "build/icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "deleteAppDataOnUninstall": false,
+      "perMachine": false
+    },
+    "portable": {
+      "artifactName": "CyberChef-portable.exe"
     }
   }
 }

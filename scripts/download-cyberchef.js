@@ -94,6 +94,15 @@ async function main() {
     await removeDir(ELECTRON_APP_DIR);
     await fs.promises.mkdir(ELECTRON_APP_DIR, { recursive: true });
     await copyDir(sourceDir, ELECTRON_APP_DIR);
+    
+    // Remove LICENSE files to reduce size
+    console.log('🗑️  Removing LICENSE files...');
+    const { execSync } = require('child_process');
+    try {
+      execSync(`find "${ELECTRON_APP_DIR}" -name "*.LICENSE.txt" -delete`, { stdio: 'pipe' });
+    } catch (err) {
+      console.warn('⚠️  Could not remove LICENSE files');
+    }
 
     // Rename main HTML to index.html if needed
     const htmlFiles = (await fs.promises.readdir(ELECTRON_APP_DIR)).filter(f => f.endsWith('.html'));
