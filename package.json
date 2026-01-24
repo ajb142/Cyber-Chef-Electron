@@ -16,7 +16,8 @@
   "devDependencies": {
     "electron": "^31.2.0",
     "electron-builder": "^24.13.3",
-    "extract-zip": "^2.0.1"
+    "extract-zip": "^2.0.1",
+    "png-to-ico": "^3.0.1"
   },
   "build": {
     "appId": "io.cyberchef.desktop",
@@ -25,12 +26,34 @@
       "electron-main.js"
     ],
     "extraResources": [
-      { "from": "electron/app", "to": "app" },
-      { "from": "electron/version.json", "to": "version.json" }
+      {
+        "from": "electron/app",
+        "to": "app"
+      },
+      {
+        "from": "electron/version.json",
+        "to": "version.json"
+      }
     ],
-    "extraMetadata": { "main": "electron-main.js" },
-    "directories": { "output": "dist/electron" },
-    "linux": { "target": ["AppImage"], "category": "Utility", "icon": "build/icon.png" },
-    "win": { "target": ["nsis", "portable"], "icon": "build/icon.ico" }
+    "extraMetadata": {
+      "main": "electron-main.js"
+    },
+    "directories": {
+      "output": "dist/electron"
+    },
+    "linux": {
+      "target": [
+        "AppImage"
+      ],
+      "category": "Utility",
+      "icon": "build/icon.png"
+    },
+    "win": {
+      "target": [
+        "nsis",
+        "portable"
+      ],
+      "icon": "build/icon.ico"
+    }
   }
 }
