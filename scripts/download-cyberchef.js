@@ -113,22 +113,34 @@ async function main() {
     await fs.promises.writeFile(VERSION_FILE, JSON.stringify(versionData, null, 2), 'utf8');
     console.log('💾 Wrote electron/version.json');
 
-    // Copy icons if present
+    // Copy and convert icons
     await fs.promises.mkdir(BUILD_DIR, { recursive: true });
     const iconCandidatesPng = [
+      path.join(ELECTRON_APP_DIR, 'images', 'cyberchef-128x128.png'),
       path.join(ELECTRON_APP_DIR, 'images', 'icon-256.png'),
       path.join(ELECTRON_APP_DIR, 'images', 'icon.png'),
       path.join(ELECTRON_APP_DIR, 'images', 'logo-256.png'),
       path.join(ELECTRON_APP_DIR, 'images', 'logo.png'),
     ];
-    const iconCandidatesIco = [
-      path.join(ELECTRON_APP_DIR, 'favicon.ico'),
-      path.join(ELECTRON_APP_DIR, 'images', 'favicon.ico'),
-      path.join(ELECTRON_APP_DIR, 'static', 'images', 'favicon.ico'),
-    ];
-    let copiedPng = false, copiedIco = false;
-    for (const c of iconCandidatesPng) if (!copiedPng && fs.existsSync(c)) { await fs.promises.copyFile(c, path.join(BUILD_DIR, 'icon.png')); copiedPng = true; console.log(`🖼 Copied ${c} -> build/icon.png`); }
-    for (const c of iconCandidatesIco) if (!copiedIco && fs.existsSync(c)) { await fs.promises.copyFile(c, path.join(BUILD_DIR, 'icon.ico')); copiedIco = true; console.log(`🖼 Copied ${c} -> build/icon.ico`); }
+    
+    let copiedPng = false;
+    for (const c of iconCandidatesPng) {
+      if (!copiedPng && fs.existsSync(c)) {
+        await fs.promises.copyFile(c, path.join(BUILD_DIR, 'icon.png'));
+        copiedPng = true;
+        console.log(`🖼 Copied ${c} -> build/icon.png`);
+        
+        // Convert PNG to ICO for Windows
+        try {
+          const { execSync } = require('child_process');
+          execSync(`npx png-to-ico "${c}" > "${path.join(BUILD_DIR, 'icon.ico')}"`, { stdio: 'pipe' });
+          console.log(`🖼 Converted icon.png -> build/icon.ico`);
+        } catch (err) {
+          console.warn(`⚠️  Could not convert to ICO (install png-to-ico): ${err.message}`);
+        }
+        break;
+      }
+    }
 
     // Clean up
     await removeDir(DOWNLOAD_DIR);
