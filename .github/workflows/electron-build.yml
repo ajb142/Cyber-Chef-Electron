@@ -97,7 +97,7 @@ jobs:
         run: npm run prepare:electron
 
       - name: Run CSP/Network Isolation Tests
-        run: npm run test:network-isolation
+        run: xvfb-run --auto-servernum npm run test:network-isolation
 
       - name: Download artifacts (Linux)
         uses: actions/download-artifact@v4

@@ -11,7 +11,7 @@
     "electron:dev": "npm run prepare:electron && npx electron electron-main.js",
     "electron:build:linux": "npm run prepare:electron && npx electron-builder --linux AppImage",
     "electron:build:win": "npm run prepare:electron && npx electron-builder --win nsis portable",
-    "test:network-isolation": "npx electron scripts/test-network-isolation.js"
+    "test:network-isolation": "node scripts/run-network-test.js"
   },
   "devDependencies": {
     "electron": "^31.2.0",
