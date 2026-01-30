@@ -122,6 +122,25 @@ jobs:
           echo "version=${VERSION}" >> $GITHUB_OUTPUT
           echo "date=${DATE}" >> $GITHUB_OUTPUT
 
+      - name: Delete existing release if it exists
+        continue-on-error: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG_NAME="electron-v${{ steps.release_body.outputs.version }}"
+          echo "Checking for existing release with tag: ${TAG_NAME}"
+          
+          # Try to get the release ID for this tag
+          RELEASE_ID=$(gh release view "${TAG_NAME}" --json id --jq '.id' 2>/dev/null || echo "")
+          
+          if [ -n "$RELEASE_ID" ]; then
+            echo "Found existing release (ID: ${RELEASE_ID}), deleting..."
+            gh release delete "${TAG_NAME}" --yes --cleanup-tag
+            echo "Release and tag deleted successfully"
+          else
+            echo "No existing release found for tag ${TAG_NAME}"
+          fi
+
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
         with:
