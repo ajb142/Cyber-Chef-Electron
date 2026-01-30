@@ -135,14 +135,36 @@ async function main() {
     let copiedPng = false;
     for (const c of iconCandidatesPng) {
       if (!copiedPng && fs.existsSync(c)) {
-        await fs.promises.copyFile(c, path.join(BUILD_DIR, 'icon.png'));
+        // Read the icon and resize to 512x512 for Linux AppImage requirements
+        try {
+          const sharp = require('sharp');
+          const iconBuffer = await fs.promises.readFile(c);
+          const metadata = await sharp(iconBuffer).metadata();
+          
+          // Resize to 512x512 if smaller than 256x256
+          if (metadata.width < 256 || metadata.height < 256) {
+            await sharp(iconBuffer)
+              .resize(512, 512, { fit: 'contain', background: { r: 0, g: 0, b: 0, alpha: 0 } })
+              .png()
+              .toFile(path.join(BUILD_DIR, 'icon.png'));
+            console.log(`🖼 Resized ${c} (${metadata.width}x${metadata.height}) -> build/icon.png (512x512)`);
+          } else {
+            await fs.promises.copyFile(c, path.join(BUILD_DIR, 'icon.png'));
+            console.log(`🖼 Copied ${c} -> build/icon.png`);
+          }
+        } catch (err) {
+          // Fallback: just copy the file if sharp is not available
+          await fs.promises.copyFile(c, path.join(BUILD_DIR, 'icon.png'));
+          console.log(`🖼 Copied ${c} -> build/icon.png`);
+          console.warn(`⚠️  Could not resize icon (install sharp for resizing): ${err.message}`);
+        }
+        
         copiedPng = true;
-        console.log(`🖼 Copied ${c} -> build/icon.png`);
         
         // Convert PNG to ICO for Windows
         try {
           const { execSync } = require('child_process');
-          execSync(`npx png-to-ico "${c}" > "${path.join(BUILD_DIR, 'icon.ico')}"`, { stdio: 'pipe' });
+          execSync(`npx png-to-ico "${path.join(BUILD_DIR, 'icon.png')}" > "${path.join(BUILD_DIR, 'icon.ico')}"`, { stdio: 'pipe' });
           console.log(`🖼 Converted icon.png -> build/icon.ico`);
         } catch (err) {
           console.warn(`⚠️  Could not convert to ICO (install png-to-ico): ${err.message}`);
