@@ -25,6 +25,7 @@
     "productName": "CyberChef",
     "asar": true,
     "asarUnpack": [],
+    "publish": null,
     "files": [
       "electron-main.js"
     ],
