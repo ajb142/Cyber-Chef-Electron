@@ -31,7 +31,7 @@ jobs:
       - name: Generate checksums
         run: |
           cd dist/electron
-          find . -maxdepth 1 -type f ! -name "SHA256SUMS.txt" -exec sha256sum {} \; | sed 's|\./||' > SHA256SUMS.txt
+          find . -maxdepth 1 -type f ! -name "SHA256SUMS-linux.txt" -exec sha256sum {} \; | sed 's|\./||' > SHA256SUMS-linux.txt
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
@@ -39,7 +39,7 @@ jobs:
           name: CyberChef-Electron-Linux
           path: |
             dist/electron/*.AppImage
-            dist/electron/SHA256SUMS.txt
+            dist/electron/SHA256SUMS-linux.txt
           retention-days: 30
 
   build-windows:
@@ -65,9 +65,9 @@ jobs:
         shell: pwsh
         run: |
           Set-Location dist/electron
-          Get-ChildItem -File | ForEach-Object {
+          Get-ChildItem -File | Where-Object { $_.Name -ne 'SHA256SUMS-windows.txt' } | ForEach-Object {
             $hash = Get-FileHash -Algorithm SHA256 -Path $_.FullName
-            "$($hash.Hash)  $($_.Name)" | Out-File -FilePath SHA256SUMS.txt -Append -Encoding ASCII
+            "$($hash.Hash)  $($_.Name)" | Out-File -FilePath SHA256SUMS-windows.txt -Append -Encoding ASCII
           }
 
       - name: Upload artifacts
@@ -76,7 +76,7 @@ jobs:
           name: CyberChef-Electron-Windows
           path: |
             dist/electron/*.exe
-            dist/electron/SHA256SUMS.txt
+            dist/electron/SHA256SUMS-windows.txt
           retention-days: 30
 
   verify-and-release:
