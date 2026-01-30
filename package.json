@@ -23,7 +23,6 @@
   "build": {
     "appId": "io.cyberchef.desktop",
     "productName": "CyberChef",
-    "publish": "never",
     "asar": true,
     "asarUnpack": [],
     "files": [

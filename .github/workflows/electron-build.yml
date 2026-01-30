@@ -20,7 +20,7 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
-        run: npm install ci
+        run: npm ci
 
       - name: Prepare latest CyberChef assets
         run: npm run prepare:electron
@@ -56,7 +56,7 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
-        run: npm install ci
+        run: npm ci
 
       - name: Prepare latest CyberChef assets
         run: npm run prepare:electron
