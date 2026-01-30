@@ -97,9 +97,19 @@ async function main() {
     
     // Remove LICENSE files to reduce size
     console.log('🗑️  Removing LICENSE files...');
-    const { execSync } = require('child_process');
+    async function removeLicenseFiles(dir) {
+      const entries = await fs.promises.readdir(dir, { withFileTypes: true });
+      for (const e of entries) {
+        const fullPath = path.join(dir, e.name);
+        if (e.isDirectory()) {
+          await removeLicenseFiles(fullPath);
+        } else if (e.name.endsWith('.LICENSE.txt')) {
+          await fs.promises.unlink(fullPath);
+        }
+      }
+    }
     try {
-      execSync(`find "${ELECTRON_APP_DIR}" -name "*.LICENSE.txt" -delete`, { stdio: 'pipe' });
+      await removeLicenseFiles(ELECTRON_APP_DIR);
     } catch (err) {
       console.warn('⚠️  Could not remove LICENSE files');
     }
