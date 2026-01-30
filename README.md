@@ -2,7 +2,7 @@
 
 A one-click offline Electron build for [CyberChef](https://gchq.github.io/CyberChef/) with network isolation and Content Security Policy (CSP) enforcement.
 
-Whilst the cybechef tool is completly browser based and does not make any outbound connections, this serves as an extra layer of protection to those who may want to put sensitiv information into the tool.
+Whilst the cybechef tool is completly browser based and does not make any outbound connections, this serves as an extra layer of protection to those who may want to put sensitive information into the tool.
 
 This is also an alternative to the docker image approach provided by the cyberchef project.
 
