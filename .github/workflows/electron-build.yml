@@ -135,8 +135,8 @@ jobs:
           
           if [ -n "$RELEASE_ID" ]; then
             echo "Found existing release (ID: ${RELEASE_ID}), deleting..."
-            gh release delete "${TAG_NAME}" --yes
-            echo "Release deleted successfully"
+            gh release delete "${TAG_NAME}" --yes --cleanup-tag
+            echo "Release and tag deleted successfully"
           else
             echo "No existing release found for tag ${TAG_NAME}"
           fi
