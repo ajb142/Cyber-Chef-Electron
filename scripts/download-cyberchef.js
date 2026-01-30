@@ -111,7 +111,7 @@ async function main() {
     try {
       await removeLicenseFiles(ELECTRON_APP_DIR);
     } catch (err) {
-      console.warn('⚠️  Could not remove LICENSE files');
+      console.warn('⚠️  Could not remove LICENSE files:', err.message);
     }
 
     // Rename main HTML to index.html if needed
