@@ -20,10 +20,7 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
-        run: npm install ci
-
-      - name: Prepare latest CyberChef assets
-        run: npm run prepare:electron
+        run: npm ci
 
       - name: Build Linux AppImage
         run: npm run electron:build:linux
@@ -56,10 +53,7 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
-        run: npm install ci
-
-      - name: Prepare latest CyberChef assets
-        run: npm run prepare:electron
+        run: npm ci
 
       - name: Build Windows exe
         run: npm run electron:build:win
